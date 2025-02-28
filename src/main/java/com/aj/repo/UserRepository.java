@@ -27,6 +27,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	List<UserVo> findByOrginizationIdAndRole(long orginizationId, Role role);
 
+	void save(Optional<User> user);
+
 
 
 	

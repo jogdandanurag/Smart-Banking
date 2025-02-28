@@ -25,5 +25,6 @@ public class ResponseConstant {
 	    public static final String UNKNOWN_ERROR_CODE = "99";
 	    public static final String UNKNOWN_ERROR_MSG = "An unspecified error occurred.";
 		public static final String BAD_REQUEST_CODE="07";
-	
+	    public static final String TOO_MANY_REQUEST_CODE="27";
+	    public static final String TOO_MANY_REQUEST_MSG="Too many request pass";
 }
