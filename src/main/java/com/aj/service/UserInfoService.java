@@ -43,6 +43,18 @@ public class UserInfoService implements UserDetailsService {
 	
 	@Autowired
 	CommonService commonService;
+	
+	@Autowired
+	JwtService  jwtService;
+	
+	@Autowired
+    private ResetTokenService tokenService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private RateLimitService rateLimitService;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -84,6 +96,24 @@ public class UserInfoService implements UserDetailsService {
 	    log.info("User authenticated successfully: {}", user.getUsername());
 	    return user;
 	}
+	
+	public boolean logout(String token) {
+        try {
+            String jwt = token.startsWith("Bearer ") ? token.substring(7) : token;
+            String username = jwtService.extractUsername(jwt);
+
+            if (jwtService.validateToken(jwt, new org.springframework.security.core.userdetails.User(
+                    username, "", new java.util.ArrayList<>())) && !jwtService.isTokenBlacklisted(jwt)) {
+                jwtService.blacklistToken(jwt);
+               return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+        
 	public User getUserByUsername(String username) {
 		return repository.findByUsername(username).orElse(null);
 	}
@@ -220,6 +250,46 @@ public class UserInfoService implements UserDetailsService {
             list.add(userVo);
         }
         return list;
+	}
+	
+	public void forgotPassword(String email) {
+        validateEmailFormat(email);
+
+        if (!rateLimitService.allowRequest(email)) {
+            throw new RuntimeException("Too many requests. Please try again later.");
+        }
+
+        Optional<User> user = repository.findByEmail(email);
+        if (user == null) {
+            return; // Silent failure
+        }
+
+        String resetToken = tokenService.generateResetToken(email);
+        emailService.sendResetPasswordEmail(email, resetToken);
+    }
+	
+	
+	public boolean resetPassword(String token, String newPassword) {
+	    if (token == null) {
+	        throw new RuntimeException("Reset token is required");
+	    }
+	    validatePasswordStrength(newPassword);
+
+	    String email = tokenService.validateAndGetEmail(token);
+	    if (email == null) {
+	        return false;
+	    }
+
+	    Optional<User> optionalUser = repository.findByEmail(email);
+	    if (optionalUser.isEmpty()) {
+	        return false;
+	    }
+
+	    User user = optionalUser.get();
+	    user.setPassword(newPassword);
+	  //  user.encodePassword(passwordEncoder);
+	    repository.save(user);
+	    return true;
 	}
 
 	 

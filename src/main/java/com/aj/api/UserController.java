@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,7 @@ import com.aj.utils.FilesUtils;
 import com.aj.utils.ResponseConstant;
 import com.aj.vo.AuthRequest;
 import com.aj.vo.AuthResponse;
+import com.aj.vo.PasswordReset;
 import com.aj.vo.UserVo;
 
 @RestController
@@ -106,7 +108,40 @@ public class UserController {
 	         );
 	     }
 	 }
+	 
+	 @PostMapping("/logout")
+	    public Response<String> logout(@RequestHeader("Authorization") String authorizationHeader) {
+	        try {
+	            if (authorizationHeader == null || authorizationHeader.isEmpty()) {
+	                return new Response<>(
+	                    ResponseConstant.BAD_REQUEST_CODE,
+	                    "Authorization header is required",
+	                    null
+	                );
+	            }
 
+	            boolean success = userService.logout(authorizationHeader);
+	            if (success) {
+	                return new Response<>(
+	                    ResponseConstant.SUCCESS_CODE,
+	                    "Logout successful. Token invalidated in real-time.",
+	                    null
+	                );
+	            } else {
+	                return new Response<>(
+	                    ResponseConstant.UNAUTHORIZED_CODE,
+	                    "Logout failed: Invalid or already expired/blacklisted token",
+	                    null
+	                );
+	            }
+	        } catch (Exception e) {
+	            return new Response<>(
+	                ResponseConstant.INTERNAL_SERVER_ERROR_CODE,
+	                "An error occurred during logout: " + e.getMessage(),
+	                null
+	            );
+	        }
+	    }
 	 // Helper method to determine login field
 	 private String determineLoginField(AuthRequest authRequest) {
 	     if (authRequest.getUsername() != null && !authRequest.getUsername().isEmpty()) {
@@ -119,7 +154,68 @@ public class UserController {
 	     return "unknown field";
 	 }
 
+	 
+	 @PostMapping("/forgot-password")
+	 public Response<String> forgotPassword(@RequestBody PasswordReset request) {
+	     try {
+	         if (request.getEmail() == null) {
+	             throw new RuntimeException("Email is required");
+	         }
+	         userService.forgotPassword(request.getEmail());
+	         return new Response<>(
+	                 ResponseConstant.SUCCESS_CODE,
+	                 "If the email exists, a reset link has been sent.",
+	                 null
+	         );
+	     } catch (RuntimeException e) {
+	         return new Response<>(
+	                 ResponseConstant.BAD_REQUEST_CODE,
+	                 e.getMessage().equals(ResponseConstant.TOO_MANY_REQUEST_MSG) ? ResponseConstant.TOO_MANY_REQUEST_MSG : e.getMessage(),
+	                 null
+	         );
+	     } catch (Exception e) {
+	         return new Response<>(
+	                 ResponseConstant.INTERNAL_SERVER_ERROR_CODE,
+	                 "An unexpected error occurred",
+	                 null
+	         );
+	         }
+	     }
 
+	    @PostMapping("/reset-password")
+	    public Response<String> resetPassword(@RequestBody PasswordReset request) {
+	        try {
+	            if (request.getToken() == null || request.getNewPassword() == null) {
+	                throw new RuntimeException("Token and new password are required");
+	            }
+	            boolean success = userService.resetPassword(request.getToken(), request.getNewPassword());
+	            if (success) {
+	                return new Response<>(
+	                    ResponseConstant.SUCCESS_CODE,
+	                    "Password reset successfully",
+	                    null
+	                );
+	            } else {
+	                return new Response<>(
+	                    ResponseConstant.BAD_REQUEST_CODE,
+	                    "Invalid or expired reset token",
+	                    null
+	                );
+	            }
+	        } catch (RuntimeException e) {
+	            return new Response<>(
+	                ResponseConstant.BAD_REQUEST_CODE,
+	                e.getMessage(),
+	                null
+	            );
+	        } catch (Exception e) {
+	            return new Response<>(
+	                ResponseConstant.INTERNAL_SERVER_ERROR_CODE,
+	                "An unexpected error occurred",
+	                null
+	            );
+	        }
+	    }
 
 
 
