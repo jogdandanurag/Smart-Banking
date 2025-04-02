@@ -15,7 +15,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "tbl_todo_users")
+@Table(name = "tbl_banking_users")
 public class User {
 
 	@Id

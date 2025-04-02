@@ -1,6 +1,7 @@
 package com.aj.config;
 
 import java.io.IOException;
+import java.net.ConnectException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 logger.debug("JWT token found for user: {}", username);
             }
 
-            // If the username exists and the SecurityContext is not already authenticated, proceed with authentication
+            // If username exists and no authentication exists in context, proceed
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 if (jwtService.validateToken(token, userDetails)) {
@@ -58,27 +59,46 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } else {
-                    logger.warn("JWT token is invalid for user: {}", username);
+                    logger.warn("JWT token validation failed for user: {}", username);
                 }
             }
+            filterChain.doFilter(request, response); // Continue the filter chain
+            logger.debug("JWT authentication filter processing completed");
+
         } catch (ExpiredJwtException e) {
-            logger.error("JWT token has expired: {}", e.getMessage());
+            logger.error("JWT token has expired for user {}: {}", username, e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("JWT token has expired");
             return;
+
         } catch (JwtException e) {
-            logger.error("Invalid JWT token: {}", e.getMessage());
+            logger.error("Invalid JWT token for user {}: {}", username, e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Invalid JWT token");
             return;
+
         } catch (Exception e) {
-            logger.error("An error occurred while processing the JWT token: {}", e.getMessage());
+            // Check if the root cause is a Redis connection failure
+            Throwable rootCause = getRootCause(e);
+            if (rootCause instanceof ConnectException || rootCause.getMessage().contains("Redis")) {
+                logger.error("Failed to connect to Redis while processing JWT token for user {}: {}", username, rootCause.getMessage());
+                response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+                response.getWriter().write("Service temporarily unavailable due to Redis connection failure");
+                return;
+            }
+            logger.error("Unexpected error processing JWT token for user {}: {}", username, e.getMessage(), e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("An internal error occurred while processing the JWT token");
             return;
         }
+    }
 
-        filterChain.doFilter(request, response);  // Continue the filter chain
-        logger.debug("JWT authentication filter processing completed");
+    // Helper method to get the root cause of an exception
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        return cause;
     }
 }
