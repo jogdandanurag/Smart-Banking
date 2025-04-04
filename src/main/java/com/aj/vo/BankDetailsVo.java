@@ -1,36 +1,18 @@
-package com.aj.model;
+package com.aj.vo;
 
-import java.sql.Timestamp;
+public class BankDetailsVo {
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "tbl_banking_account")
-public class BankDetails {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
+   private long id;
 	
 	private String bankName;
-	
-	private String email;
-	
-	private Role role;
-	
-	private String mobilNumber;
 	
 	 private String addressLine1;
 	    
      private String addressLine2;
     
      private String city;
+     
+     private String mobilNumber;
     
      private String state;
     
@@ -52,24 +34,15 @@ public class BankDetails {
     
      private String country;
      
-     private Timestamp createdAt;
+     private String createdAt;
      
-     private Timestamp updatedAt;
+     private String updatedAt;
      
      private String updatedBy;
      
+     private String email;
      
-     
-
-     @PrePersist
- 	protected void onCreate() {
- 		createdAt = new Timestamp(System.currentTimeMillis());
- 	}
-
- 	@PreUpdate
- 	protected void onUpdate() {
- 		updatedAt = new Timestamp(System.currentTimeMillis());
- 	}
+     private String role;
 
 	public long getId() {
 		return id;
@@ -111,32 +84,8 @@ public class BankDetails {
 		this.city = city;
 	}
 
-	public Role getRole() {
-		return role;
-	}
-
-	public void setRole(Role role) {
-		this.role = role;
-	}
-
-	public String getMobilNumber() {
-		return mobilNumber;
-	}
-
-	public void setMobilNumber(String mobilNumber) {
-		this.mobilNumber = mobilNumber;
-	}
-
 	public String getState() {
 		return state;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
 	}
 
 	public void setState(String state) {
@@ -153,6 +102,14 @@ public class BankDetails {
 
 	public String getIfscCode() {
 		return ifscCode;
+	}
+
+	public String getMobilNumber() {
+		return mobilNumber;
+	}
+
+	public void setMobilNumber(String mobilNumber) {
+		this.mobilNumber = mobilNumber;
 	}
 
 	public void setIfscCode(String ifscCode) {
@@ -203,8 +160,24 @@ public class BankDetails {
 		return password;
 	}
 
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public String getCountry() {
@@ -215,19 +188,19 @@ public class BankDetails {
 		this.country = country;
 	}
 
-	public Timestamp getCreatedAt() {
+	public String getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(Timestamp createdAt) {
+	public void setCreatedAt(String createdAt) {
 		this.createdAt = createdAt;
 	}
 
-	public Timestamp getUpdatedAt() {
+	public String getUpdatedAt() {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(Timestamp updatedAt) {
+	public void setUpdatedAt(String updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 
@@ -239,5 +212,5 @@ public class BankDetails {
 		this.updatedBy = updatedBy;
 	}
 
-
+	
 }

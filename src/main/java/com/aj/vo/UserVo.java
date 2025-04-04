@@ -41,7 +41,8 @@ public class UserVo {
 
 	private boolean isCredentialsNonExpired = true;
 	
-	 private long orginizationId;
+	 
+	 private long bankId;
 
 	 
 	public String getUpdatedDate() {
@@ -156,13 +157,14 @@ public void setAccountNonExpired(boolean isAccountNonExpired) {
 	this.isAccountNonExpired = isAccountNonExpired;
 }
 
-public long getOrginizationId() {
-	return orginizationId;
+public long getBankId() {
+	return bankId;
 }
 
-public void setOrginizationId(long orginizationId) {
-	this.orginizationId = orginizationId;
+public void setBankId(long bankId) {
+	this.bankId = bankId;
 }
+
 
 public boolean isAccountNonLocked() {
 	return isAccountNonLocked;

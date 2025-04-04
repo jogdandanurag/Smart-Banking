@@ -15,7 +15,8 @@ public class UserInfoDetails implements UserDetails {
 	private static final long serialVersionUID = 2764889613442161525L;
 	private String username;
 	private String password;
-	private Long orginizationId;
+	private Long bankId;
+	private long branchId;
 	private List<GrantedAuthority> authorities;
 	private boolean isEnabled;
 	private boolean isAccountNonExpired;
@@ -27,7 +28,7 @@ public class UserInfoDetails implements UserDetails {
 		password = userInfo.getPassword();
 		authorities = Arrays.stream(userInfo.getRole().name().split(",")).map(SimpleGrantedAuthority::new)
 				.collect(Collectors.toList());
-		orginizationId=userInfo.getOrginizationId();
+		bankId=userInfo.getBankId();
 		isEnabled=userInfo.isEnabled();
 		isAccountNonLocked=userInfo.isAccountNonLocked();
 		isAccountNonExpired=userInfo.isAccountNonExpired();
@@ -69,9 +70,10 @@ public class UserInfoDetails implements UserDetails {
 	public boolean isEnabled() {
 		return isEnabled;
 	}
-	public Long getOrginizationId() {
-		return orginizationId;
+	public Long getBankId() {
+		return bankId;
 	}
+
 
 	
 }

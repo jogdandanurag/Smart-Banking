@@ -20,7 +20,10 @@ public class AESUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(AESUtil.class);
 
-    // Method to generate a new random AES secret key securely
+    /**
+     * Generate a new random AES secret key securely.
+     * @return Base64 encoded secret key
+     */
     public static String generateSecretKey() {
         try {
             SecureRandom secureRandom = new SecureRandom();
@@ -33,11 +36,15 @@ public class AESUtil {
         }
     }
 
-    // Encrypt the plain text using the provided secret key (Base64-encoded)
+    /**
+     * Encrypt the plain text using the provided secret key (Base64-encoded).
+     * @param plainText The plain text to encrypt
+     * @param base64Key The Base64 encoded secret key
+     * @return Encrypted data in Base64 format
+     */
     public static String encrypt(String plainText, String base64Key) {
         try {
             SecretKey secretKey = getSecretKeyFromBase64(base64Key);
-
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
             // Generate random IV
@@ -62,7 +69,12 @@ public class AESUtil {
         }
     }
 
-    // Decrypt the encrypted text using the provided secret key (Base64-encoded)
+    /**
+     * Decrypt the encrypted text using the provided secret key (Base64-encoded).
+     * @param encryptedText The encrypted text in Base64 format
+     * @param base64Key The Base64 encoded secret key
+     * @return Decrypted plain text
+     */
     public static String decrypt(String encryptedText, String base64Key) {
         try {
             // Decode the Base64-encoded encrypted text
@@ -99,26 +111,39 @@ public class AESUtil {
         }
     }
 
-    // Generate a secure random IV for AES-GCM
+    /**
+     * Generate a secure random IV for AES-GCM.
+     * @return IV as byte array
+     */
     private static byte[] generateIV() {
         byte[] iv = new byte[IV_SIZE];
         new SecureRandom().nextBytes(iv);
         return iv;
     }
 
-    // Convert Base64 encoded key to SecretKey object
+    /**
+     * Convert Base64 encoded key to SecretKey object.
+     * @param base64Key The Base64 encoded key
+     * @return SecretKey object
+     */
     private static SecretKey getSecretKeyFromBase64(String base64Key) {
         byte[] decodedKey = Base64.getDecoder().decode(base64Key);
         return new SecretKeySpec(decodedKey, ALGORITHM);
     }
 
-    // Example of getting a fixed secret key (stored securely in an environment variable or config)
+    /**
+     * Example of getting a fixed secret key (stored securely in an environment variable or config).
+     * @return Base64 encoded secret key
+     */
     public static String getSecureSecretKey() {
         // This can be fetched from a secure location (Key Vault, environment variable, etc.)
         return System.getenv("SECURE_AES_SECRET_KEY");
     }
 
-    // Method to get the Base64 encoded secret key (example)
+    /**
+     * Method to get the Base64 encoded secret key (example).
+     * @return Example Base64 encoded secret key
+     */
     public static String getExampleSecretKey() {
         // This is for demonstration, do not use hardcoded keys in production.
         return "0123456789abcdef0123456789abcdef"; // Replace with actual dynamic key
