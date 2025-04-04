@@ -8,31 +8,43 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AESUtil {
 
     private static final String ALGORITHM = "AES";
-    private static final int KEY_SIZE = 128;
-    private static final int IV_SIZE = 12; // Recommended size for GCM mode
-    private static final int TAG_SIZE = 128;
+    private static final int KEY_SIZE = 128; // AES 128-bit key size
+    private static final int IV_SIZE = 12;  // GCM IV size (recommended 12 bytes)
+    private static final int TAG_SIZE = 128; // GCM authentication tag size
 
-    private static final String SECRET_KEY = "0123456789abcdef0123456789abcdef"; // Fixed 256-bit secret key (Base64-encoded)
+    private static final Logger logger = LoggerFactory.getLogger(AESUtil.class);
 
-    // Encrypt the plain text using the default secret key
-    public static String encrypt(String plainText) {
-        return encrypt(plainText, SECRET_KEY);
+    /**
+     * Generate a new random AES secret key securely.
+     * @return Base64 encoded secret key
+     */
+    public static String generateSecretKey() {
+        try {
+            SecureRandom secureRandom = new SecureRandom();
+            byte[] keyBytes = new byte[KEY_SIZE / 8]; // 128-bit key
+            secureRandom.nextBytes(keyBytes);
+            return Base64.getEncoder().encodeToString(keyBytes);
+        } catch (Exception e) {
+            logger.error("Error generating secret key", e);
+            throw new RuntimeException("Error generating secret key", e);
+        }
     }
 
-    // Decrypt the encrypted text using the default secret key
-    public static String decrypt(String encryptedText) {
-        return decrypt(encryptedText, SECRET_KEY);
-    }
-
-    // Encrypt the plain text with the provided key (Base64 encoded key)
+    /**
+     * Encrypt the plain text using the provided secret key (Base64-encoded).
+     * @param plainText The plain text to encrypt
+     * @param base64Key The Base64 encoded secret key
+     * @return Encrypted data in Base64 format
+     */
     public static String encrypt(String plainText, String base64Key) {
         try {
             SecretKey secretKey = getSecretKeyFromBase64(base64Key);
-
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
             // Generate random IV
@@ -41,7 +53,7 @@ public class AESUtil {
 
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, parameterSpec);
 
-            // Perform encryption
+            // Encrypt the plain text
             byte[] cipherText = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
 
             // Concatenate IV and cipher text
@@ -49,14 +61,20 @@ public class AESUtil {
             System.arraycopy(iv, 0, encryptedData, 0, iv.length);
             System.arraycopy(cipherText, 0, encryptedData, iv.length, cipherText.length);
 
-            // Return encrypted data in Base64
+            // Return encrypted data in Base64 format
             return Base64.getEncoder().encodeToString(encryptedData);
         } catch (Exception e) {
+            logger.error("Error while encrypting", e);
             throw new RuntimeException("Error while encrypting: " + e.getMessage(), e);
         }
     }
 
-    // Decrypt the encrypted text with the provided key (Base64 encoded key)
+    /**
+     * Decrypt the encrypted text using the provided secret key (Base64-encoded).
+     * @param encryptedText The encrypted text in Base64 format
+     * @param base64Key The Base64 encoded secret key
+     * @return Decrypted plain text
+     */
     public static String decrypt(String encryptedText, String base64Key) {
         try {
             // Decode the Base64-encoded encrypted text
@@ -66,15 +84,15 @@ public class AESUtil {
                 throw new RuntimeException("Invalid encrypted data: not enough data for IV.");
             }
 
-            // Extract IV from the beginning
+            // Extract IV from the beginning of the data
             byte[] iv = new byte[IV_SIZE];
             System.arraycopy(decoded, 0, iv, 0, IV_SIZE);
 
-            // Extract cipher text from the rest of the decoded data
+            // Extract cipher text from the rest of the data
             byte[] cipherText = new byte[decoded.length - IV_SIZE];
             System.arraycopy(decoded, IV_SIZE, cipherText, 0, cipherText.length);
 
-            // Convert the base64 key to a SecretKey object
+            // Convert the base64 key to SecretKey object
             SecretKey secretKey = getSecretKeyFromBase64(base64Key);
 
             // Initialize cipher for decryption
@@ -82,31 +100,52 @@ public class AESUtil {
             GCMParameterSpec parameterSpec = new GCMParameterSpec(TAG_SIZE, iv);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, parameterSpec);
 
-            // Perform decryption
+            // Decrypt the cipher text
             byte[] decryptedData = cipher.doFinal(cipherText);
 
-            // Convert decrypted bytes to string
+            // Return the decrypted data as string
             return new String(decryptedData, StandardCharsets.UTF_8);
         } catch (Exception e) {
+            logger.error("Error while decrypting", e);
             throw new RuntimeException("Error while decrypting: " + e.getMessage(), e);
         }
     }
 
-    // Generate a random IV for AES-GCM
+    /**
+     * Generate a secure random IV for AES-GCM.
+     * @return IV as byte array
+     */
     private static byte[] generateIV() {
         byte[] iv = new byte[IV_SIZE];
         new SecureRandom().nextBytes(iv);
         return iv;
     }
 
-    // Get the secret key from Base64 string
+    /**
+     * Convert Base64 encoded key to SecretKey object.
+     * @param base64Key The Base64 encoded key
+     * @return SecretKey object
+     */
     private static SecretKey getSecretKeyFromBase64(String base64Key) {
         byte[] decodedKey = Base64.getDecoder().decode(base64Key);
         return new SecretKeySpec(decodedKey, ALGORITHM);
     }
 
-    // Return the fixed secret key (Base64 encoded)
-    public static String getSecretKey() {
-        return SECRET_KEY;
+    /**
+     * Example of getting a fixed secret key (stored securely in an environment variable or config).
+     * @return Base64 encoded secret key
+     */
+    public static String getSecureSecretKey() {
+        // This can be fetched from a secure location (Key Vault, environment variable, etc.)
+        return System.getenv("SECURE_AES_SECRET_KEY");
+    }
+
+    /**
+     * Method to get the Base64 encoded secret key (example).
+     * @return Example Base64 encoded secret key
+     */
+    public static String getExampleSecretKey() {
+        // This is for demonstration, do not use hardcoded keys in production.
+        return "0123456789abcdef0123456789abcdef"; // Replace with actual dynamic key
     }
 }

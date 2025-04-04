@@ -3,7 +3,8 @@ package com.aj.model;
 public enum Role {
 	  ROLE_USER,
 	    ROLE_ADMIN,
-	    ROLE_SUPERADMIN;
+	    ROLE_SUPERADMIN,
+	    ROLE_BANK_ADMIN;
 	    
 	    
 	    @Override

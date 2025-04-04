@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -31,6 +31,7 @@ import com.aj.vo.UserVo;
 
 @RestController
 @RequestMapping("/api/auth")
+@Component
 public class UserController {
 
     @Autowired
@@ -239,7 +240,7 @@ public class UserController {
             log.error("Error updating user details: {}", e.getMessage());
             return new Response<>(ResponseConstant.VALIDATION_ERROR_CODE, e.getMessage(), null);
         } catch (Exception e) {
-            log.error("Unexpected error updating user details: {}", e.getMessage());
+            log.error("Unexpected error updating user etails: {}", e.getMessage());
             return new Response<>(ResponseConstant.INTERNAL_SERVER_ERROR_CODE, "Failed to update user details", null);
         }
     }
@@ -248,7 +249,7 @@ public class UserController {
 
   
     @GetMapping("/profile")
-    @Secured(value = { "ROLE_USER" })
+//    @Secured(value = { "ROLE_USER" })
     public Response<UserVo> getUserProfile() {
         try {
             log.info("Fetching profile for the current user...");

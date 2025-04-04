@@ -8,10 +8,17 @@ import com.aj.vo.UserInfoDetails;
 @Service
 public class CommonService {
 
-	public Long orginizationIdIdFromContext() {
+	public Long bankIdFromContext() {
 		UserInfoDetails userDetails = (UserInfoDetails) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal();
-		return userDetails.getOrginizationId();
+		return userDetails.getBankId();
 	}
+	
+	
+//	public long branchIdFromContext() {
+//		UserInfoDetails userDetails =(UserInfoDetails) SecurityContextHolder.getContext().getAuthentication()
+//				.getPrincipal();
+//		return userDetails.getBranchId();
+//	}
 
 }

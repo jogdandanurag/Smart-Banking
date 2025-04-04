@@ -1,11 +1,8 @@
 package com.aj.model;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,7 +12,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "tbl_todo_users")
+@Table(name = "tbl_banking_users")
 public class User {
 
 	@Id
@@ -45,12 +42,6 @@ public class User {
 	
 	@Column(name="profile_path")
 	private String profilePath;
-	
-	@ElementCollection
-	@Column(name = "team_id", nullable = true)
-    private List<Long> teamId = new ArrayList<>(0);
-	
-    private long orginizationId;
 	 
 	@Column(name="created_date")
 	private Timestamp createdDate;
@@ -67,6 +58,10 @@ public class User {
 	@Column(name="is_account_non_locked")
 	private boolean isAccountNonLocked = true;
 
+	private long bankId;
+	
+	
+	
 	@Column
 	private boolean isCredentialsNonExpired = true;
 	
@@ -153,21 +148,6 @@ public class User {
 		return password;
 	}
 
-	public List<Long> getTeamId() {
-		return teamId;
-	}
-
-	public void setTeamId(List<Long> teamId) {
-		this.teamId = teamId;
-	}
-
-	public long getOrginizationId() {
-		return orginizationId;
-	}
-
-	public void setOrginizationId(long orginizationId) {
-		this.orginizationId = orginizationId;
-	}
 
 	public void setPassword(String password) {
 		this.password = password;
@@ -183,6 +163,14 @@ public class User {
 
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
+	}
+
+	public long getBankId() {
+		return bankId;
+	}
+
+	public void setBankId(long bankId) {
+		this.bankId = bankId;
 	}
 
 	public boolean isAccountNonExpired() {
@@ -218,6 +206,7 @@ public class User {
 	
 	
 	}
+
 
 	
 

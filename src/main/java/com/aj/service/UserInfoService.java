@@ -1,8 +1,6 @@
 package com.aj.service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -197,60 +195,6 @@ public class UserInfoService implements UserDetailsService {
 	}
 
 
-
-	public List<UserVo> addUser1(User userInfo) {
-		 List<UserVo> list = new ArrayList<>();
-		 
-		 Long orginizationId = commonService.orginizationIdIdFromContext();
-	        userInfo.setOrginizationId(orginizationId);
-	    if (userInfo.getUsername() == null || userInfo.getUsername().isEmpty()) {
-	        throw new RuntimeException("Username is required");
-	    }
-	    if (userInfo.getPassword() == null || userInfo.getPassword().isEmpty()) {
-	        throw new RuntimeException("Password is required");
-	    }
-	    if (userInfo.getEmail() == null || userInfo.getEmail().isEmpty()) {
-	        throw new RuntimeException("Email is required");
-	    }
-	    if (userInfo.getMobileNumber() == null ||userInfo.getMobileNumber().isEmpty()) {
-	        throw new RuntimeException("Mobile number is required");
-	    }
-
-	    if (repository.existsByUsername(userInfo.getUsername())) {
-	        throw new RuntimeException("Username '" + userInfo.getUsername() + "' already exists.");
-	    }
-	    if (repository.existsByEmail(userInfo.getEmail())) {
-	        throw new RuntimeException("Email '" + userInfo.getEmail() + "' already exists.");
-	    }
-	    if (repository.existsByMobileNumber(userInfo.getMobileNumber())) {
-	        throw new RuntimeException("Mobile number '" + userInfo.getMobileNumber() + "' already exists.");
-	    }
-	    userInfo.setPassword(passwordEncoder.encode(userInfo.getPassword()));
-	    
-        validatePasswordStrength(userInfo.getPassword());
-	    validateMobileNumber(userInfo.getMobileNumber());
-	    validateEmailFormat(userInfo.getEmail());
-
-        User savedUser = repository.save(userInfo);
-        if (savedUser != null && savedUser.getOrginizationId() != 0) {
-            repository.findByOrginizationIdAndRole(savedUser.getOrginizationId(), userInfo.getRole())
-                .forEach(e -> {
-                    UserVo userVo = new UserVo();
-                    BeanUtils.copyProperties(e, userVo);
-                    userVo.setPassword(null);
-                    userVo.setCreatedDate(DateUtil.convertTimestampToString(savedUser.getCreatedDate()));
-                    userVo.setRole(e.getRole());
-                    list.add(userVo);
-                });
-        } else if (savedUser != null) {
-            UserVo userVo = new UserVo();
-            BeanUtils.copyProperties(savedUser, userVo);
-            userVo.setPassword(null);
-            userVo.setRole(savedUser.getRole().name());
-            list.add(userVo);
-        }
-        return list;
-	}
 	
 	public void forgotPassword(String email) {
         validateEmailFormat(email);

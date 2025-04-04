@@ -1,0 +1,6 @@
+package com.aj.model;
+
+public enum AccountType {
+       SAVING_ACCOUNT , PENSION_ACCOUNT, SALARY_ACCOUNT, CURRENT_ACCOUNT, ZERO_BALANCE_ACCOUNT, 
+       ACOLARSHIP_ACCOUNT
+}
